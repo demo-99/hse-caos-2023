@@ -35,7 +35,7 @@ float custom_to_float(CustomFloat cf) {
     return (cf.sign ? -1.0 : 1.0) * significand * exponent;
 }
 
-float custom_float_add(CustomFloat cf1, CustomFloat cf2) {
+CustomFloat custom_float_add_abs(CustomFloat cf1, CustomFloat cf2) {
     if (cf1.exponent < cf2.exponent) {
         CustomFloat tmp = cf1;
         cf1 = cf2;
@@ -43,14 +43,31 @@ float custom_float_add(CustomFloat cf1, CustomFloat cf2) {
     } // cf1> cf2
     uint32_t max_exponent = cf1.exponent;
     uint32_t alligned_significant_2 = cf2.significant >> (max_exponent - cf2.exponent);
+    uint32_t result_significant = alligned_significant_2 + cf1.significant;
+    if (result_significant >> SIGNIFICANT_BIT) {
+        max_exponent += 1;
+        result_significant >>= 1;
+        if (max_exponent >> EXPONENT_BIT) {
+            max_exponent = 1u << EXPONENT_BIT - 1;
+            result_significant = 0;
+        }
+    }
+    cf1.exponent = max_exponent;
+    cf1.significant = result_significant;
+
+    return cf1;
 }
 
 int main() {
     // printf("sizeof(CustomFloat) = %ld\n", sizeof(CustomFloat));
     // printf("sizeof(Packed) = %ld\n", sizeof(Packed));
     // printf("sizeof(Default) = %ld\n", sizeof(Default));
-    CustomFloat cf;
-    cf.significant = 1u << 22;
-    cf.exponent = 127;
-    printf("%f\n", custom_to_float(cf));
+    CustomFloat cf1;
+    cf1.significant = 1u << 22;
+    cf1.exponent = 127;
+    CustomFloat cf2;
+    cf2.significant = 1u << 22 | 1u << 21;
+    cf2.exponent = 127;
+
+    printf("%f\n", custom_to_float(custom_float_add_abs(cf1, cf2)));
 }
