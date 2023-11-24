@@ -3,7 +3,7 @@
 #include <math.h>
 
 #define EXPONENT_BIT 8
-#define SIGNIFICANT_BIT 32 - 1 - EXPONENT_BIT
+#define SIGNIFICANT_BIT (32 - 1 - EXPONENT_BIT)
 
 typedef struct {
     uint32_t significant : SIGNIFICANT_BIT;
@@ -15,18 +15,6 @@ union RawFloat {
     float a;
     CustomFloat b;
 };
-
-typedef struct {
-    char c;
-    int b;
-    char d;
-} __attribute__((packed)) Packed;
-
-typedef struct {
-    char c;
-    int b;
-    char d;
-} Default;
 
 float custom_to_float(CustomFloat cf) {
     int32_t exp_bias = (1 << (EXPONENT_BIT - 1)) - 1;
@@ -42,13 +30,12 @@ CustomFloat custom_float_add_abs(CustomFloat cf1, CustomFloat cf2) {
         cf2 = tmp;
     } // cf1.exponent >= cf2.exponent
     uint32_t max_exponent = cf1.exponent;
-    uint32_t alligned_significant_2 = cf2.significant;
+    uint32_t alligned_significant_2 = cf2.significant + (1 << SIGNIFICANT_BIT);
     if (max_exponent - cf2.exponent) {
-        alligned_significant_2 = alligned_significant_2 >> (max_exponent - cf2.exponent);
-        alligned_significant_2 += 1 << (SIGNIFICANT_BIT) >> (max_exponent - cf2.exponent);
+        alligned_significant_2 >>= (max_exponent - cf2.exponent);
     }
-    uint32_t result_significant = alligned_significant_2 + cf1.significant;
-    if (result_significant >> SIGNIFICANT_BIT) {
+    uint32_t result_significant = alligned_significant_2 + cf1.significant + (1 << SIGNIFICANT_BIT);
+    if (result_significant >> (SIGNIFICANT_BIT + 1)) {
         max_exponent += 1;
         result_significant >>= 1;
         if (max_exponent >> EXPONENT_BIT) {
@@ -66,13 +53,10 @@ int main() {
     // printf("sizeof(CustomFloat) = %ld\n", sizeof(CustomFloat));
     // printf("sizeof(Packed) = %ld\n", sizeof(Packed));
     // printf("sizeof(Default) = %ld\n", sizeof(Default));
-    CustomFloat cf1;
-    cf1.significant = 1u << 22;
-    cf1.exponent = 130;
-    CustomFloat cf2;
-    cf2.significant = 1u << 22 | 1u << 21;
-    cf2.exponent = 129  ;
+    union RawFloat rf1;
+    union RawFloat rf2;
+    scanf("%f %f", &rf1.a, &rf2.a);
 
-    printf("a=%f; b=%f\n", custom_to_float(cf1), custom_to_float(cf2));
-    printf("Add %f\n", custom_to_float(custom_float_add_abs(cf1, cf2)));
+    printf("a=%f; b=%f\n", custom_to_float(rf1.b), custom_to_float(rf2.b));
+    printf("Add %f\n", custom_to_float(custom_float_add_abs(rf1.b, rf2.b)));
 }
