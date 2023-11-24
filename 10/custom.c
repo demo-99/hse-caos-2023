@@ -40,9 +40,13 @@ CustomFloat custom_float_add_abs(CustomFloat cf1, CustomFloat cf2) {
         CustomFloat tmp = cf1;
         cf1 = cf2;
         cf2 = tmp;
-    } // cf1> cf2
+    } // cf1.exponent >= cf2.exponent
     uint32_t max_exponent = cf1.exponent;
-    uint32_t alligned_significant_2 = cf2.significant >> (max_exponent - cf2.exponent);
+    uint32_t alligned_significant_2 = cf2.significant;
+    if (max_exponent - cf2.exponent) {
+        alligned_significant_2 = alligned_significant_2 >> (max_exponent - cf2.exponent);
+        alligned_significant_2 += 1 << (SIGNIFICANT_BIT) >> (max_exponent - cf2.exponent);
+    }
     uint32_t result_significant = alligned_significant_2 + cf1.significant;
     if (result_significant >> SIGNIFICANT_BIT) {
         max_exponent += 1;
@@ -64,10 +68,11 @@ int main() {
     // printf("sizeof(Default) = %ld\n", sizeof(Default));
     CustomFloat cf1;
     cf1.significant = 1u << 22;
-    cf1.exponent = 127;
+    cf1.exponent = 130;
     CustomFloat cf2;
     cf2.significant = 1u << 22 | 1u << 21;
-    cf2.exponent = 127;
+    cf2.exponent = 129  ;
 
-    printf("%f\n", custom_to_float(custom_float_add_abs(cf1, cf2)));
+    printf("a=%f; b=%f\n", custom_to_float(cf1), custom_to_float(cf2));
+    printf("Add %f\n", custom_to_float(custom_float_add_abs(cf1, cf2)));
 }
