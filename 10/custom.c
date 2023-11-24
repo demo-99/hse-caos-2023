@@ -48,7 +48,7 @@ CustomFloat custom_float_add_abs(CustomFloat cf1, CustomFloat cf2) {
         max_exponent += 1;
         result_significant >>= 1;
         if (max_exponent >> EXPONENT_BIT) {
-            max_exponent = 1u << EXPONENT_BIT - 1;
+            max_exponent = 1u << (EXPONENT_BIT - 1);
             result_significant = 0;
         }
     }
