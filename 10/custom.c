@@ -24,27 +24,41 @@ float custom_to_float(CustomFloat cf) {
 }
 
 CustomFloat custom_float_add_abs(CustomFloat cf1, CustomFloat cf2) {
+    // Ensure cf1 has a greater or equal exponent than cf2
     if (cf1.exponent < cf2.exponent) {
         CustomFloat tmp = cf1;
         cf1 = cf2;
         cf2 = tmp;
-    } // cf1.exponent >= cf2.exponent
-    uint32_t max_exponent = cf1.exponent;
-    uint32_t alligned_significant_2 = cf2.significant + (1 << SIGNIFICANT_BIT);
-    if (max_exponent - cf2.exponent) {
-        alligned_significant_2 >>= (max_exponent - cf2.exponent);
     }
-    uint32_t result_significant = alligned_significant_2 + cf1.significant + (1 << SIGNIFICANT_BIT);
-    if (result_significant >> (SIGNIFICANT_BIT + 1)) {
-        max_exponent += 1;
+
+    // Add the implicit leading 1 for normalized numbers
+    uint32_t cf1_significant = cf1.significant | (1 << SIGNIFICANT_BIT);
+    uint32_t cf2_significant = cf2.significant | (1 << SIGNIFICANT_BIT);
+
+    // Align the significands
+    uint32_t align_shift = cf1.exponent - cf2.exponent;
+    cf2_significant >>= align_shift;
+
+    // Add significands
+    uint32_t result_significant = cf1_significant + cf2_significant;
+
+    // Normalize the result if necessary
+    if (result_significant & (1 << (SIGNIFICANT_BIT + 1))) {
+        // Shift right to normalize
         result_significant >>= 1;
-        if (max_exponent >> EXPONENT_BIT) {
-            max_exponent = 1u << (EXPONENT_BIT - 1);
-            result_significant = 0;
+        // Increase exponent
+        cf1.exponent++;
+        // Check for overflow
+        if (cf1.exponent >= (1u << EXPONENT_BIT)) {
+            // Exponent overflow handling (set to infinity or max value)
+            cf1.exponent = (1u << EXPONENT_BIT) - 1;
+            cf1.significant = 0; // infinity or max value
+            return cf1;
         }
     }
-    cf1.exponent = max_exponent;
-    cf1.significant = result_significant;
+
+    // Set the new significand, removing the implicit leading 1
+    cf1.significant = result_significant & ~(1 << SIGNIFICANT_BIT);
 
     return cf1;
 }
