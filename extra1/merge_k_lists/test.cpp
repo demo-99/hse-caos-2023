@@ -44,7 +44,7 @@ void validateResult(struct ListNode* result, struct ListNode* expected, int i) {
             printf("Test Case %d failed. Result list size differs from expected.\n", i);
             return;
         }
-        if (tempA->val == tempB->val) {
+        if (tempA->val != tempB->val) {
             printf("Test Case %d failed. List isn't sorted.\n", i);
             return;
         }
