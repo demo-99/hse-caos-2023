@@ -12,5 +12,8 @@ int main()
     printf("%lf\n", sqrt(value));
 
     printf("%llf\n", mul(1.5, 2.0));
+
+    printf("%f\n", compute(1.5, 3.0));
+
     return 0;
 }
