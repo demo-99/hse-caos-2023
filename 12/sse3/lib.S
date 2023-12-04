@@ -19,7 +19,7 @@ find_first_greater_than_42:
     jz .done                            # If ecx is zero, then we're done
 
     movlpd (%eax), %xmm1                # Load the next double in the array into xmm1
-    ucomisd %xmm0, %xmm1                # Compare the value in xmm1 with 42.0 in xmm0
+    comisd %xmm0, %xmm1                # Compare the value in xmm1 with 42.0 in xmm0
     jna .next                           # If xmm1 is not above (greater), skip to the next
 
     # If the comparison above set the "st" flag, we found our element

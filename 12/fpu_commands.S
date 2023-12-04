@@ -3,9 +3,9 @@
     value_double: .double 2.5  # Double precision float value
 
 .section .text
-    .global main
+    .global _start
 
-main:
+_start:
     # Load constants onto the stack
     fld1                # Load constant 1.0 onto the stack
     fldz                # Load constant 0.0 onto the stack
@@ -42,4 +42,7 @@ main:
     fincstp             # Increment the stack top pointer
     fdecstp             # Decrement the stack top pointer
 
-    ret
+    mov $1, %eax
+    mov $2, %ebx
+    # xor %ebx, %ebx
+    int $0x80

@@ -17,8 +17,9 @@ sum:
     jnz .loop                # If count is not zero, loop again
 
     # Horizontally add the accumulated values in xmm0
-    movhlps %xmm0, %xmm1    # Move the high double of xmm0 to the low double of xmm1
-    addsd %xmm1, %xmm0      # Add low double of xmm1 (which is the high double of xmm0) to low double of xmm0
+    # movhlps %xmm0, %xmm1    # Move the high double of xmm0 to the low double of xmm1
+    # addsd %xmm1, %xmm0      # Add low double of xmm1 (which is the high double of xmm0) to low double of xmm0
+    haddpd %xmm0, %xmm0
 
     movsd %xmm0, (%esp)      # Store the result on the stack
     fldl (%esp)              # Load result from the stack into the FPU register st(0)
