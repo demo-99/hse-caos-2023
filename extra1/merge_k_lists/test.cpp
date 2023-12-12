@@ -110,9 +110,6 @@ void testMergeKLists() {
     // Free all dynamically allocated memory
     freeList(result);
     freeList(expected);
-    for (int i = 0; i < 3; i++) {
-        freeList(lists3[i]);
-    }
     free(lists3);
 }
 
