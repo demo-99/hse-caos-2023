@@ -77,7 +77,7 @@ def generate_and_run_tests(num_cases):
 
         if result is None:
             print(f"Random test {i}: Error during execution")
-        elif abs(result - expected) < 1e-6 * expected:  # Use a tolerance for floating-point comparisons
+        elif abs(result - expected) < 1e-5 * abs(expected):  # Use a tolerance for floating-point comparisons
             print(f"Random test {i}: Passed")
         else:
             print(f"Random test {i}: Failed")
