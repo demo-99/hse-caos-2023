@@ -23,7 +23,6 @@ void push(Node** head_ref, int new_data) {
 }
 
 void reverse(Node** head_ref) {
-    // YOUR CODE HERE
 }
 
 int main() {

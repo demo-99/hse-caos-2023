@@ -19,7 +19,12 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    // YOUR CODE HERE
+    wint_t ch;
+    while ((ch = fgetwc(input)) != WEOF) {
+        if (iswspace(ch) || (L'А' <= ch && ch <= L'я')) {
+            fputwc(ch, output);
+        }
+    }
 
     fclose(input);
     fclose(output);
