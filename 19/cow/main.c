@@ -25,7 +25,7 @@ int main() {
     if (pid == 0) {
         sleep(1);
         // Child: Optionally modify the data
-        data[0] = 1; // Uncomment to see the effects of CoW
+        // memset(data, 43, SIZE); // Uncomment to see the effects of CoW
         printf("Child process, press enter to exit...\n");
         pid_t main_pid = getpid();
         pid_t ppid = getppid();

@@ -9,7 +9,7 @@ int main() {
         exit(1);
     } else if (p_fork == 0) {
         char * args[] = {"hello_world", NULL};
-        execve("hello_world", args, NULL);
+        execve("hello_world", args);
         exit(1);
     }
 
