@@ -1,0 +1,30 @@
+        -:    0:Source:factorial.c
+        -:    0:Graph:factorial.gcno
+        -:    0:Data:factorial.gcda
+        -:    0:Runs:1
+        -:    1:#include <stdio.h>
+        -:    2:
+        -:    3:// Function to calculate factorial
+    #####:    4:unsigned long long int factorial(int n) {
+    #####:    5:    if (n == 0)
+    #####:    6:        return 1;
+        -:    7:    else
+    #####:    8:        return n * factorial(n - 1);
+        -:    9:}
+        -:   10:
+        1:   11:int main() {
+        -:   12:    int number;
+        -:   13:    unsigned long long int result;
+        -:   14:
+        1:   15:    printf("Enter a non-negative integer: ");
+        1:   16:    scanf("%d", &number);
+        -:   17:
+        1:   18:    if (number < 0) {
+        1:   19:        printf("Factorial of a negative number doesn't exist.\n");
+        -:   20:    } else {
+    #####:   21:        result = factorial(number);
+    #####:   22:        printf("Factorial of %d = %llu\n", number, result);
+        -:   23:    }
+        -:   24:
+        1:   25:    return 0;
+        -:   26:}
