@@ -1,0 +1,6 @@
+Total: 5 samples
+       3  60.0%  60.0%        3  60.0% fibonacci
+       2  40.0% 100.0%        2  40.0% large_memory_operation
+       0   0.0% 100.0%        5 100.0% __libc_start_main
+       0   0.0% 100.0%        5 100.0% _start
+       0   0.0% 100.0%        5 100.0% main

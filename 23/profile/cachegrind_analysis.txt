@@ -1,0 +1,25 @@
+--------------------------------------------------------------------------------
+I1 cache:         32768 B, 64 B, 8-way associative
+D1 cache:         32768 B, 64 B, 8-way associative
+LL cache:         16777216 B, 64 B, direct-mapped
+Command:          ./profile_example
+Data file:        cachegrind.out
+Events recorded:  Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Events shown:     Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Event sort order: Ir I1mr ILmr Dr D1mr DLmr Dw D1mw DLmw
+Thresholds:       0.1 100 100 100 100 100 100 100 100
+Include dirs:     
+User annotated:   
+Auto-annotation:  off
+
+--------------------------------------------------------------------------------
+Ir          I1mr  ILmr  Dr          D1mr  DLmr  Dw          D1mw    DLmw    
+--------------------------------------------------------------------------------
+657,692,438 1,137 1,126 224,279,402 2,590 2,126 129,455,527 625,654 625,596  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir          I1mr ILmr Dr          D1mr  DLmr Dw          D1mw    DLmw     file:function
+--------------------------------------------------------------------------------
+537,492,650    1    1 164,233,866     0    0 119,442,811       3       0  ???:fibonacci
+120,000,023    1    1  60,000,007     1    1  10,000,006 625,000 625,000  ???:large_memory_operation
+
