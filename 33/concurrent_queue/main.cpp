@@ -11,12 +11,24 @@ class ConcurrentQueue {
 public:
     void push(T value) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::unique_lock<std::mutex> lock(mutex);
+        queue.push(value);
+        cond_var.notify_one();
     }
 
     bool pop(T& value) {
+        std::unique_lock<std::mutex> lock(mutex);
+        cond_var.wait(lock, [this](){return !queue.empty(); });
+        if (queue.empty())
+            return false;
+        value = queue.front();
+        queue.pop();
+        return true;
     }
 
     bool empty() const {
+        std::unique_lock<std::mutex> lock(mutex);
+        return queue.empty();
     }
 
 private:

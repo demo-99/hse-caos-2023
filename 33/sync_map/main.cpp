@@ -7,24 +7,54 @@
 #include <string>
 #include <cassert>
 #include <sstream>
+#include <atomic>
+#include <condition_variable>
+
+
 
 template <typename K, typename V>
 class SyncMap {
 public:
     void insert(const K& key, const V& value) {
+        std::unique_lock<std::mutex> lock(mutex);
+        condvar.wait(lock, [this]() {return counter != 0; });
+        map[key] = value;
     }
 
     void remove(const K& key) {
+        std::unique_lock<std::mutex> lock(mutex);
+        condvar.wait(lock, [this]() {return counter != 0; });
+        map.erase(key);
     }
 
     bool find(const K& key, V& value) {
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            ++counter;
+        }
+
+        auto it = map.find(key);
+        if (it != map.end()) {
+            value = it->second;
+            --counter;
+            condvar.notify_one();
+            return true;
+        }
+        --counter;
+        condvar.notify_one();
+        return false;
     }
 
     size_t size() const {
+        std::lock_guard<std::mutex> lock(mutex);
+        return map.size();
     }
 
 private:
+    std::condition_variable condvar;
+    mutable std::mutex mutex;
     std::unordered_map<K, V> map;
+    std::atomic<int> counter;
 };
 
 const std::vector<std::pair<int, std::string>> testData = {

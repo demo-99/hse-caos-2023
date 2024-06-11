@@ -36,7 +36,13 @@ inline ThreadPool::ThreadPool(size_t threads)
                     std::function<void()> task;
 
                     {
-                        // TODO: YOUR_CODE
+                        std::unique_lock<std::mutex> lock(this->queue_mutex);
+                        this->condition.wait(lock, [this]{return (!this->tasks.empty() || this->stop);});
+                        if(this->stop){
+                            return;
+                        }
+                        task = this->tasks.front();
+                        this->tasks.pop();
                     }
 
                     task();
@@ -71,6 +77,16 @@ auto ThreadPool::enqueue(F&& f, Args&&... args)
 inline ThreadPool::~ThreadPool()
 {
     // TODO: YOUR_CODE
+    {
+        std::unique_lock<std::mutex> lock(queue_mutex);
+        stop = true;
+    }
+    condition.notify_all();
+    for(auto &worker: workers){
+        worker.join();
+    }
+
+
 }
 
 constexpr int POOL_SIZE = 10;
