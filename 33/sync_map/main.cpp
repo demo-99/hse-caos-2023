@@ -12,24 +12,15 @@ template <typename K, typename V>
 class SyncMap {
 public:
     void insert(const K& key, const V& value) {
-        map[key] = value;
     }
 
     void remove(const K& key) {
-        map.erase(key);
     }
 
     bool find(const K& key, V& value) {
-        auto it = map.find(key);
-        if (it != map.end()) {
-            value = it->second;
-            return true;
-        }
-        return false;
     }
 
     size_t size() const {
-        return map.size();
     }
 
 private:
