@@ -17,13 +17,13 @@ class SyncMap {
 public:
     void insert(const K& key, const V& value) {
         std::unique_lock<std::mutex> lock(mutex);
-        condvar.wait(lock, [this]() {return counter != 0; });
+        condvar.wait(lock, [this]() {return !counter; });
         map[key] = value;
     }
 
     void remove(const K& key) {
         std::unique_lock<std::mutex> lock(mutex);
-        condvar.wait(lock, [this]() {return counter != 0; });
+        condvar.wait(lock, [this]() {return !counter; });
         map.erase(key);
     }
 
@@ -36,12 +36,18 @@ public:
         auto it = map.find(key);
         if (it != map.end()) {
             value = it->second;
+            std::lock_guard<std::mutex> lock(mutex);
             --counter;
-            condvar.notify_one();
+            if (counter == 0) {
+                condvar.notify_one();
+            }
             return true;
         }
+        std::lock_guard<std::mutex> lock(mutex);
         --counter;
-        condvar.notify_one();
+        if (counter == 0) {
+            condvar.notify_one();
+        }
         return false;
     }
 
@@ -54,7 +60,7 @@ private:
     std::condition_variable condvar;
     mutable std::mutex mutex;
     std::unordered_map<K, V> map;
-    std::atomic<int> counter;
+    int counter = 0;
 };
 
 const std::vector<std::pair<int, std::string>> testData = {
@@ -112,12 +118,12 @@ int main() {
         insertThreads.emplace_back(insertValues, std::ref(syncMap), i);
     }
 
-    for (int i = 0; i < 2; ++i) {
-        findThreads.emplace_back(findValues, std::ref(syncMap), i);
-    }
-
     for (auto& thread : insertThreads) {
         thread.join();
+    }
+
+    for (int i = 0; i < 2; ++i) {
+        findThreads.emplace_back(findValues, std::ref(syncMap), i);
     }
 
     validateMapSize(syncMap, testData.size());
