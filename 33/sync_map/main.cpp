@@ -15,6 +15,10 @@
 template <typename K, typename V>
 class SyncMap {
 public:
+    SyncMap() {
+        counter = 0;
+    }
+
     void insert(const K& key, const V& value) {
         std::unique_lock<std::mutex> lock(mutex);
         condvar.wait(lock, [this]() {return !counter; });
@@ -31,23 +35,18 @@ public:
         {
             std::lock_guard<std::mutex> lock(mutex);
             ++counter;
+            std::cout << counter << std::endl;
         }
 
         auto it = map.find(key);
         if (it != map.end()) {
             value = it->second;
-            std::lock_guard<std::mutex> lock(mutex);
             --counter;
-            if (counter == 0) {
-                condvar.notify_one();
-            }
+            condvar.notify_all();
             return true;
         }
-        std::lock_guard<std::mutex> lock(mutex);
         --counter;
-        if (counter == 0) {
-            condvar.notify_one();
-        }
+        condvar.notify_all();
         return false;
     }
 
@@ -60,7 +59,7 @@ private:
     std::condition_variable condvar;
     mutable std::mutex mutex;
     std::unordered_map<K, V> map;
-    int counter = 0;
+    std::atomic<int> counter;
 };
 
 const std::vector<std::pair<int, std::string>> testData = {
