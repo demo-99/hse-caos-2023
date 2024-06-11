@@ -6,6 +6,7 @@
 #include <random>
 #include <string>
 #include <cassert>
+#include <sstream>
 
 template <typename K, typename V>
 class SyncMap {
@@ -33,7 +34,6 @@ public:
 
 private:
     std::unordered_map<K, V> map;
-    mutable std::mutex mtx;
 };
 
 const std::vector<std::pair<int, std::string>> testData = {
@@ -55,7 +55,9 @@ void findValues(SyncMap<int, std::string>& syncMap, int threadId) {
     for (const auto& [key, value] : testData) {
         std::string foundValue;
         bool found = syncMap.find(key, foundValue);
-        std::cout << "Thread " << threadId << (found ? " found " : " did not find ") << "key " << key << std::endl;
+        std::stringstream ss;
+        ss << "Thread " << threadId << (found ? " found " : " did not find ") << "key " << key << std::endl;
+        std::cout << ss.str();
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
@@ -63,15 +65,19 @@ void findValues(SyncMap<int, std::string>& syncMap, int threadId) {
 void removeValues(SyncMap<int, std::string>& syncMap, int threadId) {
     for (const auto& [key, value] : testData) {
         syncMap.remove(key);
-        std::cout << "Thread " << threadId << " removed key " << key << std::endl;
+        std::stringstream ss;
+        ss << "Thread " << threadId << " removed key " << key << std::endl;
+        std::cout << ss.str();
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
 }
 
 void validateMapSize(SyncMap<int, std::string>& syncMap, size_t expectedSize) {
+    std::stringstream ss;
+    ss << "Expected map size " << expectedSize << std::endl;
+    ss << "Current map size: " << syncMap.size() << std::endl;
+    std::cout << ss.str();
     assert(syncMap.size() == expectedSize);
-    std::cout << "Validation passed: expected size " << expectedSize << std::endl;
-    std::cout << "Current map size: " << syncMap.size() << std::endl;
 }
 
 int main() {
@@ -81,40 +87,32 @@ int main() {
     std::vector<std::thread> findThreads;
     std::vector<std::thread> removeThreads;
 
-    // Create threads to insert values
     for (int i = 0; i < 2; ++i) {
         insertThreads.emplace_back(insertValues, std::ref(syncMap), i);
     }
 
-    // Create threads to find values
     for (int i = 0; i < 2; ++i) {
         findThreads.emplace_back(findValues, std::ref(syncMap), i);
     }
 
-    // Join insertion threads
     for (auto& thread : insertThreads) {
         thread.join();
     }
 
-    // Validate that all values are present
     validateMapSize(syncMap, testData.size());
 
-    // Join find threads
     for (auto& thread : findThreads) {
         thread.join();
     }
 
-    // Create threads to remove values
     for (int i = 0; i < 2; ++i) {
         removeThreads.emplace_back(removeValues, std::ref(syncMap), i);
     }
 
-    // Join removal threads
     for (auto& thread : removeThreads) {
         thread.join();
     }
 
-    // Validate that the map is empty
     validateMapSize(syncMap, 0);
 
     return 0;
